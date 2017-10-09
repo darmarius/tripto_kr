@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 public final class Main extends javax.swing.JFrame {
@@ -39,7 +40,7 @@ public final class Main extends javax.swing.JFrame {
     public ArrayList<EVENTS> getEventsList() throws SQLException    {
         ArrayList<EVENTS> EventsList = new ArrayList<EVENTS>();
         Connection con = getConnection();
-        String queryEVENTS ="SELECT * FROM events where rdate>=' "+choosenday+"'";
+        String queryEVENTS ="SELECT * FROM events where rdate=' "+choosenday+"'";
         Statement st;
         ResultSet rs;
         try {
@@ -60,8 +61,11 @@ public final class Main extends javax.swing.JFrame {
       
    }
   
-    public void showEvents() throws SQLException
-    {
+    /**
+     *
+     * @throws SQLException
+     */
+    public void showEvents() throws SQLException{
        ArrayList<EVENTS> list = getEventsList();
        DefaultTableModel mod = (DefaultTableModel) jTable2.getModel();
        for( int i = mod.getRowCount() - 1; i >= 0; i-- ) {
@@ -152,12 +156,22 @@ public final class Main extends javax.swing.JFrame {
             "Date", "Time", "Type", "Place"
         }
     ));
+    jTable2.addMouseListener(new java.awt.event.MouseAdapter() {
+        public void mouseClicked(java.awt.event.MouseEvent evt) {
+            jTable2MouseClicked(evt);
+        }
+    });
     jScrollPane2.setViewportView(jTable2);
 
     jMenu1.setText("Add");
     jMenuBar1.add(jMenu1);
 
     jMenu2.setText("Remove");
+    jMenu2.addMouseListener(new java.awt.event.MouseAdapter() {
+        public void mousePressed(java.awt.event.MouseEvent evt) {
+            DeleteEvent(evt);
+        }
+    });
     jMenuBar1.add(jMenu2);
 
     jMenu3.setText("Change");
@@ -198,6 +212,31 @@ public final class Main extends javax.swing.JFrame {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_dateChooserPanel1OnSelectionChange
+
+    private void DeleteEvent(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_DeleteEvent
+        int selected = jTable2.getSelectedRow();
+        int sure = JOptionPane.showConfirmDialog(null, "You are sure?", "Confirmation", JOptionPane.YES_NO_OPTION);
+                if (sure  == JOptionPane.YES_OPTION){
+                    Connection con = getConnection();
+                    String queryDelete ="delete FROM events "
+                            + "where rdate = '"+(String) jTable2.getModel().getValueAt(selected,0)+"' "
+                            + " and rtime= '"+(String) jTable2.getModel().getValueAt(selected,1)+"' "
+                            + " and rtype= '"+(String) jTable2.getModel().getValueAt(selected,2)+"' "
+                            + " and rplace= '"+(String) jTable2.getModel().getValueAt(selected,3)+"' ";
+ 
+            try {
+                Statement st = con.createStatement();
+                st.executeUpdate(queryDelete);
+                 showEvents();
+            } catch (SQLException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
+                }
+    }//GEN-LAST:event_DeleteEvent
+
+    private void jTable2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable2MouseClicked
+     
+    }//GEN-LAST:event_jTable2MouseClicked
     
     /**
      * @param args the command line arguments

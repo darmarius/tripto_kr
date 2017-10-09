@@ -19,7 +19,14 @@ public class EVENTS{
       this.place=place;
       this.notify=notify;  
   }
- 
+  public EVENTS(String rdate, String rtime, String type, String place) {
+      this.id=0;
+      this.rdate=rdate;
+      this.rtime=rtime;
+      this.type=type;
+      this.place=place;
+      this.notify=false;  
+  }
   public int getId(){return id;}
   public String getDate(){return rdate;}
   public String getTime(){return rtime;}
