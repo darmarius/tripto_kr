@@ -5,34 +5,35 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
-public final class Main extends javax.swing.JFrame {
+public final class sheduler extends javax.swing.JFrame {
     
     String choosenday;
     SimpleDateFormat dateFormat;
-    String url="jdbc:mysql://localhost/sheduler";                            
-    String userid="root";   
-    String password="1212";  
+      
     
-    public Main() throws SQLException {
+    public sheduler() throws SQLException {
         this.dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         choosenday=dateFormat.format(new java.util.Date());
-        System.out.println(choosenday);
         initComponents();
         showEvents();
     }
    
     
     public Connection getConnection()    {
+        String url="jdbc:mysql://localhost/sheduler";                            
+        String userid="root";   
+        String password="1212";
         try {
             Connection connect = DriverManager.getConnection(url,userid,password);
             return connect;
         
         }   
         catch (SQLException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(sheduler.class.getName()).log(Level.SEVERE, null, ex);
         }
        return null;
     }
@@ -61,10 +62,7 @@ public final class Main extends javax.swing.JFrame {
       
    }
   
-    /**
-     *
-     * @throws SQLException
-     */
+  
     public void showEvents() throws SQLException{
        ArrayList<EVENTS> list = getEventsList();
        DefaultTableModel mod = (DefaultTableModel) jTable2.getModel();
@@ -164,6 +162,11 @@ public final class Main extends javax.swing.JFrame {
     jScrollPane2.setViewportView(jTable2);
 
     jMenu1.setText("Add");
+    jMenu1.addMouseListener(new java.awt.event.MouseAdapter() {
+        public void mouseClicked(java.awt.event.MouseEvent evt) {
+            AddEventButton(evt);
+        }
+    });
     jMenuBar1.add(jMenu1);
 
     jMenu2.setText("Remove");
@@ -174,7 +177,7 @@ public final class Main extends javax.swing.JFrame {
     });
     jMenuBar1.add(jMenu2);
 
-    jMenu3.setText("Change");
+    jMenu3.setText("Notifications");
     jMenuBar1.add(jMenu3);
 
     setJMenuBar(jMenuBar1);
@@ -194,22 +197,22 @@ public final class Main extends javax.swing.JFrame {
         layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
         .add(layout.createSequentialGroup()
             .addContainerGap()
-            .add(dateChooserPanel1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 220, Short.MAX_VALUE)
-            .add(18, 18, 18)
+            .add(dateChooserPanel1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 206, Short.MAX_VALUE)
+            .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
             .add(jScrollPane2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 127, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-            .addContainerGap())
+            .add(12, 12, 12))
     );
 
     pack();
+    setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void dateChooserPanel1OnSelectionChange(datechooser.events.SelectionChangedEvent evt) {//GEN-FIRST:event_dateChooserPanel1OnSelectionChange
         choosenday= dateFormat.format(dateChooserPanel1.getSelectedDate().getTime());
-         System.out.println(choosenday);
         try {
             showEvents();
         } catch (SQLException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(sheduler.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_dateChooserPanel1OnSelectionChange
 
@@ -229,7 +232,7 @@ public final class Main extends javax.swing.JFrame {
                 st.executeUpdate(queryDelete);
                  showEvents();
             } catch (SQLException ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(sheduler.class.getName()).log(Level.SEVERE, null, ex);
             }
                 }
     }//GEN-LAST:event_DeleteEvent
@@ -237,19 +240,28 @@ public final class Main extends javax.swing.JFrame {
     private void jTable2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable2MouseClicked
      
     }//GEN-LAST:event_jTable2MouseClicked
+
+    private void AddEventButton(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_AddEventButton
+           AddForm AddForm1 = new AddForm();
+           /*AddForm1.setAlwaysOnTop(true);*/
+           this.enable(false);
+           AddForm1.show();
+           /* this.setVisible(false);*/
+         
+              
+           
+    }//GEN-LAST:event_AddEventButton
     
-    /**
-     * @param args the command line arguments
-     */
+    
     public static void main(String args[]) {
 
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
                 try {
-                    new Main().setVisible(true);
+                    new sheduler().setVisible(true);
                 } catch (SQLException ex) {
-                   Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                   Logger.getLogger(sheduler.class.getName()).log(Level.SEVERE, null, ex);
                }
             }
         });
