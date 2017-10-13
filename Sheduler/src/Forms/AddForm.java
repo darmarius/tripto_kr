@@ -1,23 +1,18 @@
 package Forms;
 
 import java.awt.Frame;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import Forms.sheduler;
-import java.sql.DriverManager;
+import classes.EVENTS;
 import java.text.SimpleDateFormat;
 
 
 public class AddForm extends javax.swing.JFrame {
     String choosenday;
     SimpleDateFormat dateFormat;
+    EVENTS Event = new EVENTS();
     
     public AddForm() {
-        
         initComponents();
         this.dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         jButton1.setEnabled(false);
@@ -150,26 +145,11 @@ public class AddForm extends javax.swing.JFrame {
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
-
-    public Connection getConnection()    {
-        String url="jdbc:mysql://localhost/sheduler";                            
-        String userid="root";   
-        String password="1212";
-        try {
-            Connection connect = DriverManager.getConnection(url,userid,password);
-            return connect;
-        
-        }   
-        catch (SQLException ex) {
-            Logger.getLogger(sheduler.class.getName()).log(Level.SEVERE, null, ex);
-        }
-       return null;
-    }
+    
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         Frame[] frames = sheduler.getFrames();
         frames[0].enable(true);
         this.dispose();
-
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jTextPane1KeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextPane1KeyPressed
@@ -204,24 +184,13 @@ public class AddForm extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         Frame[] frames = sheduler.getFrames();
-        
-               
         int sure = JOptionPane.showConfirmDialog(null, "You are sure?", "Confirmation", JOptionPane.YES_NO_OPTION);
-                if (sure  == JOptionPane.YES_OPTION){
-                    Connection con = getConnection();
-                    String queryInsert ="insert into events (rdate,rtime,rtype,rplace,rnotify)"
-                            +"values ('" +(String) dateFormat.format(dateChooserCombo1.getSelectedDate().getTime())+"','"
-                            +(String) this.jComboBox1.getSelectedItem()+":"+this.jComboBox2.getSelectedItem()+":00','"
-                            +(String) this.jTextPane1.getText()+"',' "
-                            +(String) this.jTextPane2.getText()+"',0) ";
- 
-            try {
-                Statement st = con.createStatement();
-                st.executeUpdate(queryInsert);
-            } catch (SQLException ex) {
-                Logger.getLogger(sheduler.class.getName()).log(Level.SEVERE, null, ex);
-            }
-                }
+            if (sure  == JOptionPane.YES_OPTION){
+                Event.AddEvent((String) dateFormat.format(dateChooserCombo1.getSelectedDate().getTime()),
+                            (String) this.jComboBox1.getSelectedItem()+":"+this.jComboBox2.getSelectedItem(),
+                            (String) this.jTextPane1.getText(),
+                            (String) this.jTextPane2.getText());
+               }
         frames[0].enable(true);
         this.dispose();        
     }//GEN-LAST:event_jButton1ActionPerformed

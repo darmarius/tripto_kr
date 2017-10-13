@@ -1,11 +1,14 @@
 package Forms;
 import classes.EVENTS;
+import classes.Notification;
+import classes.Notyfire;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
@@ -13,73 +16,22 @@ public final class sheduler extends javax.swing.JFrame {
     
     String choosenday;
     SimpleDateFormat dateFormat;
+    SimpleDateFormat dateTimeFormat;
+    Notification Noty = new Notification();
+    EVENTS Event = new EVENTS();
       
     
-    public sheduler() throws SQLException {
+    public sheduler() throws SQLException, InterruptedException, FileNotFoundException, IOException {
         this.dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        this.dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         choosenday=dateFormat.format(new java.util.Date());
         initComponents();
         showEvents();
-    }
-   
-    
-    public Connection getConnection()    {
-        String url="jdbc:mysql://localhost/sheduler";                            
-        String userid="root";   
-        String password="1212";
-        try {
-            Connection connect = DriverManager.getConnection(url,userid,password);
-            return connect;
+        Thread t = (new Thread((Runnable) new Notyfire()));
+        t.start();
         
-        }   
-        catch (SQLException ex) {
-            Logger.getLogger(sheduler.class.getName()).log(Level.SEVERE, null, ex);
-        }
-       return null;
     }
-    
-    public ArrayList<EVENTS> getEventsList() throws SQLException    {
-        ArrayList<EVENTS> EventsList = new ArrayList<EVENTS>();
-        Connection con = getConnection();
-        String queryEVENTS ="SELECT * FROM events where rdate=' "+choosenday+"'";
-        Statement st;
-        ResultSet rs;
-        try {
-            st=con.createStatement();
-            rs=st.executeQuery(queryEVENTS);
-            EVENTS event1;
-            while (rs.next())
-            {
-                event1= new EVENTS(rs.getInt("rid"),rs.getString("rdate"),rs.getString("rtime"),
-                        rs.getString("rtype"),rs.getString("rplace"),rs.getBoolean("rnotify"));
-                EventsList.add(event1);
-            }
-                
-        }
-        catch(SQLException e){return null;}
-            
-        return EventsList;
       
-   }
-  
-  
-    public void showEvents() throws SQLException{
-       ArrayList<EVENTS> list = getEventsList();
-       DefaultTableModel mod = (DefaultTableModel) jTable2.getModel();
-       for( int i = mod.getRowCount() - 1; i >= 0; i-- ) {
-        mod.removeRow(i);}
-       Object[] row = new Object[4];
-       for (int i = 0 ; i<list.size(); i++)
-       {
-           row[0]=list.get(i).getDate();
-           row[1]=list.get(i).getTime();
-           row[2]=list.get(i).getType();
-           row[3]=list.get(i).getPlace();
-           mod.addRow(row);
-       }
-       
-           
-    }
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
@@ -151,14 +103,9 @@ public final class sheduler extends javax.swing.JFrame {
 
         },
         new String [] {
-            "Date", "Time", "Type", "Place"
+            "ID", "Date", "Time", "Type", "Place"
         }
     ));
-    jTable2.addMouseListener(new java.awt.event.MouseAdapter() {
-        public void mouseClicked(java.awt.event.MouseEvent evt) {
-            jTable2MouseClicked(evt);
-        }
-    });
     jScrollPane2.setViewportView(jTable2);
 
     jMenu1.setText("Add");
@@ -178,6 +125,11 @@ public final class sheduler extends javax.swing.JFrame {
     jMenuBar1.add(jMenu2);
 
     jMenu3.setText("Notifications");
+    jMenu3.addMouseListener(new java.awt.event.MouseAdapter() {
+        public void mousePressed(java.awt.event.MouseEvent evt) {
+            AddNotificationsButton(evt);
+        }
+    });
     jMenuBar1.add(jMenu3);
 
     setJMenuBar(jMenuBar1);
@@ -207,6 +159,22 @@ public final class sheduler extends javax.swing.JFrame {
     setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
+    public void showEvents() throws SQLException{
+       ArrayList<EVENTS> list = Event.getEventsList(choosenday);
+       DefaultTableModel mod = (DefaultTableModel) jTable2.getModel();
+       for( int i = mod.getRowCount() - 1; i >= 0; i-- ) {
+        mod.removeRow(i);}
+       Object[] row = new Object[5];
+       for (int i = 0 ; i<list.size(); i++)
+       {
+           row[0]=list.get(i).getId();
+           row[1]=list.get(i).getDate();
+           row[2]=list.get(i).getTime();
+           row[3]=list.get(i).getType();
+           row[4]=list.get(i).getPlace();
+           mod.addRow(row);
+       }}
+      
     private void dateChooserPanel1OnSelectionChange(datechooser.events.SelectionChangedEvent evt) {//GEN-FIRST:event_dateChooserPanel1OnSelectionChange
         choosenday= dateFormat.format(dateChooserPanel1.getSelectedDate().getTime());
         try {
@@ -220,37 +188,49 @@ public final class sheduler extends javax.swing.JFrame {
         int selected = jTable2.getSelectedRow();
         int sure = JOptionPane.showConfirmDialog(null, "You are sure?", "Confirmation", JOptionPane.YES_NO_OPTION);
                 if (sure  == JOptionPane.YES_OPTION){
-                    Connection con = getConnection();
-                    String queryDelete ="delete FROM events "
-                            + "where rdate = '"+(String) jTable2.getModel().getValueAt(selected,0)+"' "
-                            + " and rtime= '"+(String) jTable2.getModel().getValueAt(selected,1)+"' "
-                            + " and rtype= '"+(String) jTable2.getModel().getValueAt(selected,2)+"' "
-                            + " and rplace= '"+(String) jTable2.getModel().getValueAt(selected,3)+"' ";
- 
-            try {
-                Statement st = con.createStatement();
-                st.executeUpdate(queryDelete);
-                 showEvents();
+                    Event.DeleteEvent(jTable2.getModel().getValueAt(selected,0));
+                    try {
+                showEvents();
             } catch (SQLException ex) {
                 Logger.getLogger(sheduler.class.getName()).log(Level.SEVERE, null, ex);
             }
                 }
     }//GEN-LAST:event_DeleteEvent
 
-    private void jTable2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable2MouseClicked
-     
-    }//GEN-LAST:event_jTable2MouseClicked
-
     private void AddEventButton(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_AddEventButton
            AddForm AddForm1 = new AddForm();
-           /*AddForm1.setAlwaysOnTop(true);*/
            this.enable(false);
-           AddForm1.show();
-           /* this.setVisible(false);*/
-         
-              
-           
+           AddForm1.show();          
     }//GEN-LAST:event_AddEventButton
+
+    private void AddNotificationsButton(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_AddNotificationsButton
+        try {
+            Notifications notyForm = new Notifications();
+            this.enable(false);
+            notyForm.show();
+        } catch (SQLException ex) {
+            Logger.getLogger(sheduler.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_AddNotificationsButton
+    
+    public void Notify() throws SQLException, InterruptedException{
+    
+    while (true){
+    String CurrTime = dateTimeFormat.format(new java.util.Date());
+    String CurrDate = dateFormat.format(new java.util.Date());
+    ArrayList<Notification> list = Noty.getNotificationsList(CurrDate);
+    for (int i = 0;i<list.size();i++){     
+     String datetimenotify =list.get(i).getDate()+" "+list.get(i).getTime();
+     datetimenotify = datetimenotify.substring(0, datetimenotify.length()-3);
+     if (CurrTime == null ? datetimenotify == null : CurrTime.equals(datetimenotify)){
+         Noty.Ring(list.get(i).getId());
+         Noty.DeleteNotification(list.get(i).getId());
+     }
+        
+    }
+    Thread.sleep(60000);
+    }
+    } 
     
     
     public static void main(String args[]) {
@@ -260,9 +240,14 @@ public final class sheduler extends javax.swing.JFrame {
             public void run() {
                 try {
                     new sheduler().setVisible(true);
+
                 } catch (SQLException ex) {
                    Logger.getLogger(sheduler.class.getName()).log(Level.SEVERE, null, ex);
-               }
+               } catch (InterruptedException ex) {
+                    Logger.getLogger(sheduler.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IOException ex) {
+                    Logger.getLogger(sheduler.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
     }
